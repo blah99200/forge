@@ -1,0 +1,16 @@
+{
+  "gemini": {
+    "fast": {"model": "gemini-3.1-flash-lite-preview", "thinking": "low", "context": 1000000},
+    "deep": {"model": "gemini-3-flash-preview", "thinking": "high", "context": 1000000},
+    "pro": {"model": "gemini-3.1-pro-preview", "thinking": "high", "context": 1000000}
+  },
+  "openai": {
+    "fast": {"model": "gpt-5.4-nano", "thinking": "low", "context": 400000},
+    "deep": {"model": "gpt-5.4-mini", "thinking": "high", "context": 400000},
+    "pro": {"model": "gpt-5.4", "thinking": "high", "context": 1000000}
+  },
+  "grok": {
+    "fast": {"model": "grok-4-1-fast-reasoning", "thinking": "", "context": 2000000},
+    "deep": {"model": "grok-4.20-0309-reasoning", "thinking": "", "context": 2000000}
+  }
+}

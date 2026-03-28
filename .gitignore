@@ -1,0 +1,16 @@
+# Forge working directory (created in target projects, not part of this plugin)
+forge/
+
+# User-specific Claude Code config
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/

@@ -1,0 +1,8 @@
+{
+  "name": "forge",
+  "version": "2.0.0",
+  "description": "Lean TDD orchestration — fresh-context review, external model dispatch, hook-based enforcement",
+  "author": {
+    "name": "blah99200"
+  }
+}
