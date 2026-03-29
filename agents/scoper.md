@@ -40,11 +40,12 @@ Maturity: prototype | mvp | production
 Risk Tolerance: high | moderate | low
 
 ## Review Providers
-gemini, openai
+gemini, openai, grok
 
 ## Models
 gemini: <model-id> (thinking: <level>)
 openai: <model-id> (thinking: <level>)
+grok: <model-id> (thinking: <level>)
 
 ## Key Files
 src/main.ts

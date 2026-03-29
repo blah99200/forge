@@ -77,11 +77,12 @@ Maturity: prototype | mvp | production
 Risk Tolerance: high | moderate | low
 
 ## Review Providers
-gemini, openai
+gemini, openai, grok
 
 ## Models
 gemini: gemini-3.1-pro-preview (thinking: high)
 openai: gpt-5.4 (thinking: high)
+grok: grok-4-1-fast-reasoning (thinking: high)
 
 ## Key Files
 src/main.ts
