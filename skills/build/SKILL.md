@@ -47,6 +47,14 @@ If violations found: revert the offending changes and re-delegate to the correct
 
 Run Quality Command from config.md (if configured). If it fails, delegate to **implementer** to fix before proceeding.
 
+### 3b. Smoke Test (conditional)
+When Key Files include platform artifacts (`skills/`, `hooks/`, `.claude-plugin/`), verify the built artifacts actually load before proceeding:
+- **Skill files**: run `claude -p "list your skills" --allowedTools "" --max-turns 1` and confirm the new/modified skill appears in output. If it doesn't, the skill has invalid frontmatter or isn't discoverable — flag before VALIDATE.
+- **Hook files**: verify `hooks.json` parses as valid JSON (`python3 -c "import json; json.load(open('hooks.json'))"` or equivalent).
+- **Plugin config**: verify `plugin.json` parses as valid JSON.
+
+If smoke test fails: delegate to **implementer** to fix the artifact, then re-run the smoke test. Max 2 attempts — if still failing, pause and present to user.
+
 ### 4. VALIDATE Phase
 Delegate to **validator** agent as a subagent (context fork — isolated from GREEN work but not a separate `claude -p` session).
 

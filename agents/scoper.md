@@ -15,9 +15,14 @@ tools: Read, Glob, Grep, Write, Edit, Bash, WebSearch, WebFetch
 3. Explore the codebase to understand existing structure, test infrastructure, and conventions.
 4. Check if any scoped changes are already implemented in the codebase. Mark them as `(already-implemented)` to avoid wasted build cycles.
 5. Challenge assumptions. Flag ambiguity. Point out risks.
-6. Write `forge/scope.md` with requirements (each gets a `[REQ-XXX]` ID), phases, and test strategy.
-7. Write `forge/config.md` with build configuration.
-8. Present scope for user approval.
+6. Auto-inject platform-constraint requirements when Key Files include platform artifacts:
+   - **Skill files** (`skills/`): valid YAML frontmatter with required fields (`name:`, `description:`), valid markdown body
+   - **Hooks** (`hooks/`): valid `hooks.json` schema, hook scripts must be executable
+   - **Plugin config** (`.claude-plugin/`): valid `plugin.json` schema
+   These requirements don't need user confirmation — they are platform invariants. Tag them `(platform-constraint)`.
+7. Write `forge/scope.md` with requirements (each gets a `[REQ-XXX]` ID), phases, and test strategy.
+8. Write `forge/config.md` with build configuration.
+9. Present scope for user approval. Platform-constraint requirements are listed for visibility but don't require approval.
 
 ## Output: forge/scope.md
 - Clear requirements with IDs

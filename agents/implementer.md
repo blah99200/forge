@@ -24,6 +24,7 @@ tools: Read, Glob, Grep, Write, Edit, Bash
 
 ## Constraints
 - NEVER modify test files. If a test seems wrong, stop and surface the issue.
+- Never change production code solely to avoid triggering a test. If a test is overly broad or matches valid code incorrectly, that is a broken test — flag it as a finding rather than working around it.
 - Skip requirements marked `(already-implemented)`.
 - Minimal code to make tests pass. Do not over-engineer. But content files (configs, templates, data files) must have real, meaningful content — not empty stubs even if the test only checks existence.
 - If stuck on the same test for more than 3 attempts, stop and surface the issue to the user. Do not loop.
