@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Review Invoice — BillMap{% endblock %}
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs" type="module"></script>
+<link rel="stylesheet" href="/static/pdf-viewer.css">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Review Invoice #{{ invoice.id }}</h1>
+    <div class="status-badge status-{{ invoice.status }}">{{ invoice.status }}</div>
+</div>
+
+<div class="review-layout"
+     data-store='{
+         invoiceId: {{ invoice.id }},
+         extraction: {{ extraction | tojson }},
+         confidence: {{ confidence | tojson }},
+         editing: false
+     }'>
+
+    <!-- Left panel: PDF Viewer with highlighted regions -->
+    <div class="pdf-panel">
+        <div id="pdf-container" class="pdf-container"
+             data-pdf-url="/invoices/{{ invoice.id }}/pdf"
+             data-regions='{{ regions | tojson }}'>
+            <canvas id="pdf-canvas"></canvas>
+            <canvas id="overlay-canvas"></canvas>
+        </div>
+        <div class="pdf-controls">
+            <button class="btn btn-sm" id="prev-page">Prev</button>
+            <span id="page-info">Page 1 / 1</span>
+            <button class="btn btn-sm" id="next-page">Next</button>
+        </div>
+    </div>
+
+    <!-- Right panel: Extracted data -->
+    <div class="data-panel">
+        <div class="confidence-bar">
+            <label>Overall Confidence</label>
+            <div class="progress">
+                <div class="progress-fill"
+                     style="width: {{ (confidence.overall * 100) | int }}%"
+                     class="{% if confidence.overall >= 0.9 %}high{% elif confidence.overall >= 0.7 %}medium{% else %}low{% endif %}">
+                    {{ (confidence.overall * 100) | int }}%
+                </div>
+            </div>
+        </div>
+
+        <h3>Header Fields</h3>
+        <div class="field-grid">
+            {% for field_name, field_data in extraction.items() if field_name != 'line_items' %}
+            <div class="field-row"
+                 data-field="{{ field_name }}"
+                 data-on-mouseenter="$$highlightRegion('{{ field_name }}')"
+                 data-on-mouseleave="$$clearHighlight()">
+                <label>{{ field_name | replace('_', ' ') | title }}</label>
+                <div class="field-value">
+                    <span data-show="!$editing">{{ field_data if field_data is string else field_data.value if field_data is mapping else '' }}</span>
+                    <input data-show="$editing"
+                           type="text"
+                           data-model="extraction.{{ field_name }}"
+                           value="{{ field_data if field_data is string else field_data.value if field_data is mapping else '' }}" />
+                    {% if confidence.fields and field_name in confidence.fields %}
+                    <span class="confidence-tag
+                        {% if confidence.fields[field_name] >= 0.9 %}high
+                        {% elif confidence.fields[field_name] >= 0.7 %}medium
+                        {% else %}low{% endif %}">
+                        {{ (confidence.fields[field_name] * 100) | int }}%
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if extraction.line_items %}
+        <h3>Line Items</h3>
+        <table class="line-items-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Item Code</th>
+                    <th>Qty</th>
+                    <th>Unit Price</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in extraction.line_items %}
+                <tr>
+                    <td>{{ item.description or '' }}</td>
+                    <td>{{ item.item_code or '' }}</td>
+                    <td>{{ item.quantity or '' }}</td>
+                    <td>{{ item.unit_price or '' }}</td>
+                    <td>{{ item.amount or '' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        {% if issues %}
+        <h3>Issues</h3>
+        <ul class="issues-list">
+            {% for issue in issues %}
+            <li class="issue-item">{{ issue }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <div class="action-buttons">
+            <button class="btn btn-primary"
+                    data-on-click="$$post('/invoices/{{ invoice.id }}/approve')">
+                Approve & Push
+            </button>
+            <button class="btn btn-secondary"
+                    data-on-click="$editing = !$editing">
+                <span data-show="!$editing">Edit</span>
+                <span data-show="$editing">Done Editing</span>
+            </button>
+            <button class="btn btn-danger"
+                    data-on-click="$$post('/invoices/{{ invoice.id }}/reject')">
+                Reject
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/pdf-viewer.js" type="module"></script>
+{% endblock %}

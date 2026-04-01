@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Mapping Builder — BillMap{% endblock %}
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs" type="module"></script>
+<link rel="stylesheet" href="/static/pdf-viewer.css">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Create Vendor Mapping</h1>
+    <p>Define extraction regions for this vendor's invoices.</p>
+</div>
+
+<div class="builder-layout"
+     data-store='{
+         invoiceId: {{ invoice_id }},
+         vendorName: "{{ suggested.vendor_name.value if suggested and suggested.vendor_name else "" }}",
+         activeField: null,
+         drawingMode: false,
+         fields: {{ suggested_fields | tojson }},
+         savedMapping: false
+     }'>
+
+    <!-- Left: PDF with drawing overlay -->
+    <div class="pdf-panel">
+        <div id="pdf-container" class="pdf-container drawing-enabled"
+             data-pdf-url="/invoices/{{ invoice_id }}/pdf"
+             data-regions='{{ suggested_regions | tojson }}'>
+            <canvas id="pdf-canvas"></canvas>
+            <canvas id="overlay-canvas"></canvas>
+            <canvas id="drawing-canvas"
+                    data-show="$drawingMode"
+                    data-on-mousedown="$$startDraw(evt)"
+                    data-on-mousemove="$$drawing(evt)"
+                    data-on-mouseup="$$endDraw(evt)"></canvas>
+        </div>
+        <div class="pdf-controls">
+            <button class="btn btn-sm" id="prev-page">Prev</button>
+            <span id="page-info">Page 1 / 1</span>
+            <button class="btn btn-sm" id="next-page">Next</button>
+        </div>
+        <div class="drawing-hint" data-show="$drawingMode">
+            Draw a rectangle around the <strong data-text="$activeField"></strong> field
+        </div>
+    </div>
+
+    <!-- Right: Field mapping form -->
+    <div class="data-panel">
+        <h3>Vendor</h3>
+        <div class="field-row">
+            <label>Vendor Name</label>
+            <input type="text" data-model="vendorName" class="input-full" />
+        </div>
+
+        <h3>Field Mappings</h3>
+        <p class="hint">Click a field name to select it, then draw a rectangle on the PDF to define its extraction region.</p>
+
+        <div class="mapping-fields">
+            {% set field_names = ["invoice_number", "invoice_date", "due_date", "po_number", "subtotal", "tax_total", "total"] %}
+            {% for field_name in field_names %}
+            <div class="mapping-field-row"
+                 data-on-click="$activeField = '{{ field_name }}'; $drawingMode = true"
+                 data-class-active="$activeField === '{{ field_name }}'">
+                <span class="field-label">{{ field_name | replace('_', ' ') | title }}</span>
+                <span class="field-value" data-text="$fields.{{ field_name }}.value || '(not set)'"></span>
+                <span class="field-region-indicator"
+                      data-show="$fields.{{ field_name }}.region">
+                    [mapped]
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if suggested and suggested.line_items %}
+        <h3>Suggested Line Items</h3>
+        <table class="line-items-table">
+            <thead>
+                <tr><th>Description</th><th>Code</th><th>Qty</th><th>Price</th><th>Amount</th></tr>
+            </thead>
+            <tbody>
+                {% for item in suggested.line_items %}
+                <tr>
+                    <td>{{ item.description or '' }}</td>
+                    <td>{{ item.item_code or '' }}</td>
+                    <td>{{ item.quantity or '' }}</td>
+                    <td>{{ item.unit_price or '' }}</td>
+                    <td>{{ item.amount or '' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        <div class="action-buttons">
+            <button class="btn btn-primary"
+                    data-on-click="$$post('/templates', {
+                        name: $vendorName,
+                        vendor_tokens: [$vendorName],
+                        field_mappings: Object.entries($fields)
+                            .filter(([k,v]) => v.region)
+                            .map(([k,v]) => ({field_name: k, region: v.region}))
+                    })">
+                Save Mapping
+            </button>
+            <button class="btn btn-secondary"
+                    data-on-click="$$post('/invoices/{{ invoice_id }}/approve')">
+                Save & Approve Invoice
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/pdf-viewer.js" type="module"></script>
+{% endblock %}

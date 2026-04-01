@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Upload Invoices — BillMap{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Upload Invoices</h1>
+    <p>Upload one or more PDF invoices for processing.</p>
+</div>
+
+<div class="upload-area"
+     data-store="{files: [], uploading: false, results: null}"
+>
+    <form data-on-submit__prevent="$$post('/invoices/upload')"
+          enctype="multipart/form-data"
+          id="upload-form">
+        <div class="drop-zone"
+             data-on-dragover__prevent=""
+             data-on-drop__prevent="$$post('/invoices/upload')">
+            <div class="drop-zone-content">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <p>Drag & drop PDF files here, or click to select</p>
+                <input type="file"
+                       name="files"
+                       accept=".pdf"
+                       multiple
+                       class="file-input" />
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" data-attr-disabled="$uploading">
+            <span data-show="!$uploading">Process Invoices</span>
+            <span data-show="$uploading">Processing...</span>
+        </button>
+    </form>
+</div>
+
+<div id="results" class="results-area">
+    <!-- SSE results will be injected here -->
+</div>
+{% endblock %}

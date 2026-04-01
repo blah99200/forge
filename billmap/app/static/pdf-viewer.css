@@ -1,0 +1,38 @@
+/* PDF Viewer specific styles */
+
+.pdf-container {
+    position: relative;
+    background: #525659;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pdf-container canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+#overlay-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#drawing-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    z-index: 10;
+}
+
+.drawing-enabled #drawing-canvas {
+    pointer-events: all;
+}

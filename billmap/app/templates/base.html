@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BillMap{% endblock %}</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <!-- Datastar -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@starfederation/datastar@1/bundles/datastar.js"></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <a href="/">BillMap</a>
+        </div>
+        <div class="nav-links">
+            <a href="/invoices/upload">Upload</a>
+            <a href="/invoices/dashboard">Dashboard</a>
+            <a href="/templates/list">Mappings</a>
+            <a href="/settings/page">Settings</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

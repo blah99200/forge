@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Invoice Dashboard — BillMap{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Invoice Dashboard</h1>
+    <a href="/invoices/upload" class="btn btn-primary">Upload New</a>
+</div>
+
+<div class="dashboard"
+     data-store='{filter: "all"}'
+     data-on-load="$$get('/invoices/dashboard/data')">
+
+    <!-- Status summary cards -->
+    <div class="status-cards">
+        <div class="status-card" data-on-click="$filter = 'all'">
+            <span class="card-count">{{ counts.total }}</span>
+            <span class="card-label">Total</span>
+        </div>
+        <div class="status-card status-pending" data-on-click="$filter = 'pending'">
+            <span class="card-count">{{ counts.pending }}</span>
+            <span class="card-label">Pending</span>
+        </div>
+        <div class="status-card status-extracted" data-on-click="$filter = 'extracted'">
+            <span class="card-count">{{ counts.extracted }}</span>
+            <span class="card-label">Ready for Review</span>
+        </div>
+        <div class="status-card status-classified" data-on-click="$filter = 'classified'">
+            <span class="card-count">{{ counts.classified }}</span>
+            <span class="card-label">Needs Mapping</span>
+        </div>
+        <div class="status-card status-approved" data-on-click="$filter = 'approved'">
+            <span class="card-count">{{ counts.approved }}</span>
+            <span class="card-label">Approved</span>
+        </div>
+        <div class="status-card status-pushed" data-on-click="$filter = 'pushed'">
+            <span class="card-count">{{ counts.pushed }}</span>
+            <span class="card-label">Pushed</span>
+        </div>
+    </div>
+
+    <!-- Invoice table -->
+    <table class="invoice-table">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="select-all" /></th>
+                <th>ID</th>
+                <th>Vendor</th>
+                <th>Invoice #</th>
+                <th>Total</th>
+                <th>Confidence</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inv in invoices %}
+            <tr data-show="$filter === 'all' || $filter === '{{ inv.status }}'">
+                <td><input type="checkbox" name="invoice_ids" value="{{ inv.id }}" /></td>
+                <td>{{ inv.id }}</td>
+                <td>{{ inv.vendor_name or '—' }}</td>
+                <td>{{ inv.invoice_number or '—' }}</td>
+                <td>{{ inv.total or '—' }}</td>
+                <td>
+                    {% if inv.confidence_overall is not none %}
+                    <span class="confidence-tag
+                        {% if inv.confidence_overall >= 0.9 %}high
+                        {% elif inv.confidence_overall >= 0.7 %}medium
+                        {% else %}low{% endif %}">
+                        {{ (inv.confidence_overall * 100) | int }}%
+                    </span>
+                    {% else %}—{% endif %}
+                </td>
+                <td><span class="status-badge status-{{ inv.status }}">{{ inv.status }}</span></td>
+                <td>
+                    {% if inv.status == 'extracted' %}
+                    <a href="/invoices/{{ inv.id }}/review" class="btn btn-sm">Review</a>
+                    {% elif inv.status == 'classified' %}
+                    <a href="/invoices/{{ inv.id }}/map" class="btn btn-sm">Map</a>
+                    {% else %}
+                    <a href="/invoices/{{ inv.id }}/view" class="btn btn-sm btn-ghost">View</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Bulk actions -->
+    <div class="bulk-actions">
+        <button class="btn btn-primary"
+                data-on-click="$$post('/invoices/bulk/approve')">
+            Approve Selected
+        </button>
+    </div>
+</div>
+{% endblock %}

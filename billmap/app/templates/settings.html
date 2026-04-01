@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Settings — BillMap{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Settings</h1>
+</div>
+
+<div class="settings-page"
+     data-store='{
+         llmProvider: "{{ settings.llm_provider }}",
+         llmApiKey: "",
+         llmModel: "{{ settings.llm_model }}",
+         saving: false
+     }'>
+
+    <!-- Accounting Connections -->
+    <section class="settings-section">
+        <h2>Accounting Systems</h2>
+        <div class="connections-list">
+            {% for conn in connections %}
+            <div class="connection-card">
+                <div class="connection-info">
+                    <span class="connection-type">{{ conn.system_type | upper }}</span>
+                    <span class="connection-name">{{ conn.name }}</span>
+                    {% if conn.last_sync_at %}
+                    <span class="sync-time">Last synced: {{ conn.last_sync_at }}</span>
+                    {% endif %}
+                </div>
+                <div class="connection-actions">
+                    <button class="btn btn-sm"
+                            data-on-click="$$post('/connections/{{ conn.id }}/sync')">
+                        Sync Data
+                    </button>
+                    <button class="btn btn-sm btn-danger"
+                            data-on-click="$$delete('/connections/{{ conn.id }}')">
+                        Remove
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+
+            <button class="btn btn-secondary"
+                    data-on-click="$$get('/connections/add')">
+                + Add Connection
+            </button>
+        </div>
+    </section>
+
+    <!-- LLM Configuration -->
+    <section class="settings-section">
+        <h2>LLM Provider</h2>
+        <div class="form-group">
+            <label>Provider</label>
+            <select data-model="llmProvider">
+                <option value="">Not configured</option>
+                <option value="anthropic">Anthropic (Claude)</option>
+                <option value="openai">OpenAI (GPT)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>API Key</label>
+            <input type="password" data-model="llmApiKey" placeholder="Enter API key..." />
+        </div>
+        <div class="form-group">
+            <label>Model</label>
+            <input type="text" data-model="llmModel"
+                   placeholder="e.g. claude-sonnet-4-20250514 or gpt-4o" />
+        </div>
+        <button class="btn btn-primary"
+                data-on-click="$$put('/settings', {
+                    llm_provider: $llmProvider,
+                    llm_api_key: $llmApiKey,
+                    llm_model: $llmModel
+                })"
+                data-attr-disabled="$saving">
+            Save LLM Settings
+        </button>
+    </section>
+
+    <!-- Vendor Mappings -->
+    <section class="settings-section">
+        <h2>Vendor Mappings</h2>
+        <div class="mappings-list">
+            {% for t in templates %}
+            <div class="mapping-card">
+                <div class="mapping-info">
+                    <span class="mapping-name">{{ t.name }}</span>
+                    <span class="mapping-detail">{{ t.field_count }} fields, {{ t.rule_count }} rules</span>
+                    {% if t.auto_push_enabled %}
+                    <span class="auto-push-badge">Auto-push</span>
+                    {% endif %}
+                </div>
+                <a href="/templates/{{ t.id }}/edit" class="btn btn-sm">Edit</a>
+            </div>
+            {% endfor %}
+            {% if not templates %}
+            <p class="empty-state">No vendor mappings yet. Upload an invoice to create one.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Reference Data -->
+    <section class="settings-section">
+        <h2>Reference Data</h2>
+        {% if ref_data_summary %}
+        <div class="ref-data-grid">
+            <div class="ref-data-card">
+                <span class="ref-count">{{ ref_data_summary.vendors }}</span>
+                <span class="ref-label">Vendors</span>
+            </div>
+            <div class="ref-data-card">
+                <span class="ref-count">{{ ref_data_summary.accounts }}</span>
+                <span class="ref-label">Accounts</span>
+            </div>
+            <div class="ref-data-card">
+                <span class="ref-count">{{ ref_data_summary.items }}</span>
+                <span class="ref-label">Items</span>
+            </div>
+            <div class="ref-data-card">
+                <span class="ref-count">{{ ref_data_summary.tax_codes }}</span>
+                <span class="ref-label">Tax Codes</span>
+            </div>
+        </div>
+        {% else %}
+        <p class="empty-state">Connect an accounting system and sync to load reference data.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
